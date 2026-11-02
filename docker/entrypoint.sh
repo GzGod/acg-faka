@@ -8,6 +8,10 @@ if [ -n "${PORT:-}" ] && [ "${PORT}" != "80" ]; then
         /etc/nginx/nginx.conf
 fi
 
+# ── 0b) 注入默认主题（仅在数据库可用后执行，见下方 wait-db） ─────────────────
+ACG_DEFAULT_THEME="${ACG_DEFAULT_THEME:-AIBlue}"
+export ACG_DEFAULT_THEME
+
 cd /var/www/html
 
 DATA=/data
@@ -179,6 +183,25 @@ fi
 if [ -n "${ACG_DB_PASSWORD_FILE:-}" ] && [ -r "${ACG_DB_PASSWORD_FILE}" ]; then
     ACG_DB_PASSWORD="$(cat "${ACG_DB_PASSWORD_FILE}")"
     export ACG_DB_PASSWORD
+fi
+
+if [ -n "${ACG_DB_HOST:-}" ]; then
+    # Wait a moment for DB to be ready, then set AIBlue as default theme
+    (sleep 15 && php -r "
+        \$host = getenv('ACG_DB_HOST');
+        \$port = getenv('ACG_DB_PORT') ?: 3306;
+        \$db   = getenv('ACG_DB_DATABASE');
+        \$user = getenv('ACG_DB_USERNAME');
+        \$pass = getenv('ACG_DB_PASSWORD');
+        \$pre  = getenv('ACG_DB_PREFIX') ?: 'acg_';
+        try {
+            \$pdo = new PDO(\"mysql:host=\$host;port=\$port;dbname=\$db;charset=utf8mb4\", \$user, \$pass);
+            \$tbl = \$pre . 'config';
+            \$pdo->exec(\"UPDATE \`\$tbl\` SET \`value\`='AIBlue' WHERE \`name\`='user_theme'\");
+            \$pdo->exec(\"UPDATE \`\$tbl\` SET \`value\`='AIBlue' WHERE \`name\`='user_mobile_theme'\");
+            echo '[acg-faka] Theme set to AIBlue' . PHP_EOL;
+        } catch (Exception \$e) { echo '[acg-faka] Theme set skipped: ' . \$e->getMessage() . PHP_EOL; }
+    " 2>&1) &
 fi
 
 exec "$@"
