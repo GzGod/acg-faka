@@ -1,6 +1,13 @@
 #!/bin/sh
 set -e
 
+# ── 0) Railway $PORT 支持 ─────────────────────────────────────────────────
+# Railway 注入 $PORT，nginx 默认监听 80。用 sed 动态替换。
+if [ -n "${PORT:-}" ] && [ "${PORT}" != "80" ]; then
+    sed -i "s/listen 80 default_server;/listen ${PORT} default_server;/g; s/listen \[::\]:80 default_server;/listen [::]:${PORT} default_server;/g" \
+        /etc/nginx/nginx.conf
+fi
+
 cd /var/www/html
 
 DATA=/data
