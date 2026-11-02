@@ -186,21 +186,51 @@ if [ -n "${ACG_DB_PASSWORD_FILE:-}" ] && [ -r "${ACG_DB_PASSWORD_FILE}" ]; then
 fi
 
 if [ -n "${ACG_DB_HOST:-}" ]; then
-    # Wait a moment for DB to be ready, then set AIBlue as default theme
-    (sleep 15 && php -r "
+    # Auto-install: import SQL, create Lock, set AIBlue theme
+    (sleep 8 && php -r "
         \$host = getenv('ACG_DB_HOST');
         \$port = getenv('ACG_DB_PORT') ?: 3306;
         \$db   = getenv('ACG_DB_DATABASE');
         \$user = getenv('ACG_DB_USERNAME');
         \$pass = getenv('ACG_DB_PASSWORD');
         \$pre  = getenv('ACG_DB_PREFIX') ?: 'acg_';
+        \$lock = '/var/www/html/kernel/Install/Lock';
         try {
-            \$pdo = new PDO(\"mysql:host=\$host;port=\$port;dbname=\$db;charset=utf8mb4\", \$user, \$pass);
+            \$pdo = new PDO(\"mysql:host=\$host;port=\$port;dbname=\$db;charset=utf8mb4\", \$user, \$pass,
+                [PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION]);
+
+            // Check if already installed (config table exists)
+            \$tables = \$pdo->query('SHOW TABLES LIKE \"' . \$pre . 'config\"')->fetchAll();
+            if (empty(\$tables)) {
+                echo '[acg-faka] Running auto-install...' . PHP_EOL;
+                \$sql = file_get_contents('/var/www/html/kernel/Install/Install.sql');
+                // Replace default prefix acg_ with configured prefix
+                if (\$pre !== 'acg_') {
+                    \$sql = str_replace('\`acg_', '\`' . \$pre, \$sql);
+                }
+                // Split and execute statements
+                foreach (array_filter(array_map('trim', explode(';', \$sql))) as \$stmt) {
+                    if (\$stmt) \$pdo->exec(\$stmt);
+                }
+                echo '[acg-faka] SQL imported.' . PHP_EOL;
+            } else {
+                echo '[acg-faka] DB already installed, skipping SQL import.' . PHP_EOL;
+            }
+
+            // Set AIBlue theme
             \$tbl = \$pre . 'config';
             \$pdo->exec(\"UPDATE \`\$tbl\` SET \`value\`='AIBlue' WHERE \`name\`='user_theme'\");
             \$pdo->exec(\"UPDATE \`\$tbl\` SET \`value\`='AIBlue' WHERE \`name\`='user_mobile_theme'\");
-            echo '[acg-faka] Theme set to AIBlue' . PHP_EOL;
-        } catch (Exception \$e) { echo '[acg-faka] Theme set skipped: ' . \$e->getMessage() . PHP_EOL; }
+            echo '[acg-faka] Theme set to AIBlue.' . PHP_EOL;
+
+            // Write install Lock file
+            if (!file_exists(\$lock)) {
+                file_put_contents(\$lock, date('Y-m-d H:i:s'));
+                echo '[acg-faka] Lock file written.' . PHP_EOL;
+            }
+        } catch (Exception \$e) {
+            echo '[acg-faka] Auto-install error: ' . \$e->getMessage() . PHP_EOL;
+        }
     " 2>&1) &
 fi
 
