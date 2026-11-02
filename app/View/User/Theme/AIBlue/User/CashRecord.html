@@ -1,0 +1,15 @@
+#{include file="../Common/Header.html"}
+<div class="uc-main">
+    <div class="uc-card uc-cash-record">
+        <div class="uc-card__body">
+            <div class="uc-subtab">
+                <a href="/user/cash/index"><span class="material-icons-outlined">payments</span>#{t("硬币兑现")}</a>
+                <a href="/user/cash/record" class="active"><span class="material-icons-outlined">history</span>#{t("兑现记录")}</a>
+            </div>
+            <table id="cash-table"></table>
+        </div>
+    </div>
+</div>
+
+#{ready("/assets/user/controller/user/cash.record.js")}
+#{include file="../Common/Footer.html"}

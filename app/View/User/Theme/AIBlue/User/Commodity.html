@@ -1,0 +1,18 @@
+#{include file="../Common/Header.html"}
+<div class="uc-main">
+    <div class="uc-card">
+        <div class="uc-card__head">
+            <span class="material-icons-outlined">inventory_2</span>
+            <span class="uc-card__title">#{t("我的商品")}</span>
+        </div>
+        <div class="uc-card__body">
+            <div class="uc-toolbar">
+                <button type="button" class="layui-btn layui-btn-sm button-add"><i class="fa-duotone fa-regular fa-circle-plus"></i> #{t("添加商品")}</button>
+            </div>
+            <table id="commodity-table"></table>
+        </div>
+    </div>
+</div>
+
+#{ready("/assets/user/controller/business/commodity.js")}
+#{include file="../Common/Footer.html"}

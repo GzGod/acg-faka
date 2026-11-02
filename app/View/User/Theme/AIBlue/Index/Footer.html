@@ -1,0 +1,54 @@
+</div><!-- #pjax-container -->
+
+<!-- ── FOOTER ──────────────────────────────────────────────────── -->
+<footer style="border-top:1px solid var(--border-s);margin-top:2rem;">
+  <div style="max-width:72rem;margin:0 auto;padding:2.5rem 1rem 1.5rem;">
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:2rem;margin-bottom:2rem;">
+      <div>
+        <div style="display:flex;align-items:center;gap:.5rem;margin-bottom:.75rem;">
+          <img src="#{$favicon}" style="width:26px;height:26px;border-radius:6px;" alt="logo">
+          <span style="font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:.9rem;">#{$config.shop_name}</span>
+        </div>
+        <p style="font-size:.75rem;color:var(--muted2);line-height:1.6;">AI 订阅代充，全程自动发货。</p>
+      </div>
+      <div>
+        <h4 style="font-size:.7rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;margin-bottom:.8rem;">商城</h4>
+        <ul style="list-style:none;">
+          <li style="margin-bottom:.4rem;"><a href="/" style="font-size:.8rem;color:var(--muted);" onmouseover="this.style.color='#F0F4FF'" onmouseout="this.style.color='var(--muted)'">全部商品</a></li>
+          <li style="margin-bottom:.4rem;"><a href="/user/index/query" style="font-size:.8rem;color:var(--muted);" onmouseover="this.style.color='#F0F4FF'" onmouseout="this.style.color='var(--muted)'">查询订单</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4 style="font-size:.7rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;margin-bottom:.8rem;">账户</h4>
+        <ul style="list-style:none;">
+          <li style="margin-bottom:.4rem;"><a href="/user/authentication/login" style="font-size:.8rem;color:var(--muted);" onmouseover="this.style.color='#F0F4FF'" onmouseout="this.style.color='var(--muted)'">登录</a></li>
+          <li style="margin-bottom:.4rem;"><a href="/user/authentication/register" style="font-size:.8rem;color:var(--muted);" onmouseover="this.style.color='#F0F4FF'" onmouseout="this.style.color='var(--muted)'">注册</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4 style="font-size:.7rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;margin-bottom:.8rem;">条款</h4>
+        <ul style="list-style:none;">
+          <li style="margin-bottom:.4rem;"><a href="/user/index/legalTerms" style="font-size:.8rem;color:var(--muted);" onmouseover="this.style.color='#F0F4FF'" onmouseout="this.style.color='var(--muted)'">服务条款</a></li>
+        </ul>
+      </div>
+    </div>
+    <div style="border-top:1px solid var(--border-s);padding-top:1rem;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:.5rem;">
+      <p style="font-size:.72rem;color:var(--muted2);">© #{$config.shop_name}. 本平台仅提供合法订阅充值服务。</p>
+      <div style="display:flex;align-items:center;gap:.4rem;">
+        <span style="width:7px;height:7px;border-radius:50%;background:var(--ok);display:inline-block;"></span>
+        <span style="font-size:.72rem;color:var(--ok2);">所有服务正常</span>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<!--start::HOOK-->
+#{hook(\App\Consts\Hook::USER_GLOBAL_VIEW_FOOTER)}
+#{hook(\App\Consts\Hook::USER_VIEW_INDEX_FOOTER)}
+<!--end::HOOK-->
+#{js([
+  "/assets/common/js/jquery.min.js",
+  "/assets/common/js/bootstrap.bundle.min.js"
+])}
+</body>
+</html>

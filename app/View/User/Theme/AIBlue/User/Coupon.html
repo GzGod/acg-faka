@@ -1,0 +1,22 @@
+#{include file="../Common/Header.html"}
+<div class="uc-main">
+    <div class="uc-card">
+        <div class="uc-card__head">
+            <span class="material-icons-outlined">local_offer</span>
+            <span class="uc-card__title">#{t("优惠券管理")}</span>
+        </div>
+        <div class="uc-card__body">
+            <div class="uc-toolbar">
+                <button type="button" class="layui-btn layui-btn-sm button-add"><i class="fa-duotone fa-regular fa-circle-plus"></i> #{t("生成优惠券")}</button>
+                <button type="button" class="layui-btn layui-btn-sm button-del"><i class="fa-duotone fa-regular fa-trash-can"></i> #{t("移除选中优惠券")}</button>
+                <button type="button" class="layui-btn layui-btn-sm button-lock"><i class="fa-duotone fa-regular fa-lock-keyhole"></i> #{t("锁定选中优惠券")}</button>
+                <button type="button" class="layui-btn layui-btn-sm button-unlock"><i class="fa-duotone fa-regular fa-lock-open"></i> #{t("解锁选中优惠券")}</button>
+                <button type="button" class="layui-btn layui-btn-sm button-export"><i class="fa-duotone fa-regular fa-file-export"></i> #{t("导出筛选优惠券")}</button>
+            </div>
+            <table id="coupon-table"></table>
+        </div>
+    </div>
+</div>
+
+#{ready("/assets/user/controller/business/coupon.js")}
+#{include file="../Common/Footer.html"}

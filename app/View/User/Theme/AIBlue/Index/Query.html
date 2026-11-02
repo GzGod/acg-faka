@@ -1,0 +1,32 @@
+#{include file="./Header.html"}
+
+<section class="px-4 py-10">
+  <div style="max-width:480px;margin:0 auto;">
+    <div class="card reveal" style="padding:2rem;">
+      <h1 style="font-size:1.1rem;font-weight:700;margin-bottom:.3rem;">查询订单</h1>
+      <p style="font-size:.82rem;color:var(--muted);margin-bottom:1.5rem;">输入订单号或联系方式查询</p>
+      <form method="post" id="query-form">
+        <div style="margin-bottom:1rem;">
+          <label style="font-size:.78rem;font-weight:600;color:var(--muted);display:block;margin-bottom:.4rem;">订单号 / 联系方式</label>
+          <input type="text" name="order" class="acg-input" placeholder="订单号 或 邮箱 / 手机号" required>
+        </div>
+        <div style="margin-bottom:1.25rem;">
+          <label style="font-size:.78rem;font-weight:600;color:var(--muted);display:block;margin-bottom:.4rem;">查询密码（若设置）</label>
+          <input type="password" name="password" class="acg-input" placeholder="••••••••">
+        </div>
+        <button type="submit" class="btn-blue" style="width:100%;justify-content:center;padding:.75rem;font-size:.92rem;border-radius:10px;">查询订单</button>
+      </form>
+    </div>
+  </div>
+</section>
+
+<script>
+(function(){
+  if(!('IntersectionObserver' in window)){document.querySelectorAll('.reveal').forEach(function(el){el.classList.add('in');});return;}
+  var obs=new IntersectionObserver(function(e){e.forEach(function(x){if(x.isIntersecting){x.target.classList.add('in');obs.unobserve(x.target);}});},{threshold:.08});
+  document.querySelectorAll('.reveal').forEach(function(el){obs.observe(el);});
+})();
+</script>
+
+#{ready("/assets/user/controller/index/query.js")}
+#{include file="./Footer.html"}

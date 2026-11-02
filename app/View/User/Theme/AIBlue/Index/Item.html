@@ -1,0 +1,161 @@
+#{include file="./Header.html"}
+#{item_var($item)}
+
+<section class="px-4 py-8">
+  <div style="max-width:72rem;margin:0 auto;">
+
+    <!-- Breadcrumb -->
+    <div style="font-size:.78rem;color:var(--muted);margin-bottom:1.25rem;">
+      <a href="/" style="color:var(--muted);" onmouseover="this.style.color='#F0F4FF'" onmouseout="this.style.color='var(--muted)'">首页</a>
+      <span style="margin:0 .4rem;">›</span>
+      <span>#{lang($item.name)}</span>
+    </div>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:1.5rem;" class="item-grid">
+
+      <!-- Left: cover + description -->
+      <div style="display:flex;flex-direction:column;gap:1rem;">
+        <div class="card" style="overflow:hidden;aspect-ratio:16/9;display:flex;align-items:center;justify-content:center;">
+          #{if $item.cover}
+            <img src="#{$item.cover}" alt="#{lang($item.name)}" style="width:100%;height:100%;object-fit:cover;">
+          #{else}
+            <div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,rgba(37,99,235,.15),rgba(6,182,212,.1));">
+              <svg viewBox="0 0 24 24" fill="none" stroke="rgba(96,165,250,.6)" stroke-width="1.5" style="width:3rem;height:3rem;"><path d="M13 10V3L4 14h7v7l9-11h-7z" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </div>
+          #{/if}
+        </div>
+        #{if $item.description}
+        <div class="card" style="padding:1.25rem;">
+          <h3 style="font-size:.85rem;font-weight:700;color:var(--muted);margin-bottom:.75rem;text-transform:uppercase;letter-spacing:.06em;">商品详情</h3>
+          <div style="font-size:.85rem;color:var(--muted);line-height:1.7;">#{lang($item.description)}</div>
+        </div>
+        #{/if}
+      </div>
+
+      <!-- Right: buy panel -->
+      <div>
+        <div class="card" style="padding:1.5rem;">
+          <h1 style="font-size:1.25rem;font-weight:700;margin-bottom:.75rem;line-height:1.3;">#{lang($item.name)}</h1>
+          <div style="display:flex;flex-wrap:wrap;gap:.4rem;margin-bottom:1rem;">
+            #{if $item.delivery_way == 0}
+              <span class="badge badge-ok">自动发货</span>
+            #{else}
+              <span class="badge badge-muted">人工发货</span>
+            #{/if}
+            <span class="badge badge-blue item-stock">库存 #{$item.stock}</span>
+            <span class="badge badge-muted">已售 #{$item.order_sold}</span>
+          </div>
+
+          <!-- Price -->
+          <div style="display:flex;align-items:baseline;gap:.5rem;margin-bottom:1.25rem;padding-bottom:1.25rem;border-bottom:1px solid var(--border-s);">
+            <span style="font-family:'Space Grotesk',sans-serif;font-size:1.8rem;font-weight:700;" class="price">
+              <i style="font-style:normal;font-size:1rem;">#{$config.currency_symbol}</i><span class="price-val">#{$item.price}</span>
+            </span>
+            #{if $item.original_price}
+            <span style="font-size:.8rem;text-decoration:line-through;color:var(--muted2);">#{$config.currency_symbol}#{$item.original_price}</span>
+            #{/if}
+          </div>
+
+          <form method="post" class="vstack gap-3" id="buy-form">
+
+            <!-- Category SKU -->
+            #{if !empty($item.config.category)}
+            <div style="margin-bottom:1rem;">
+              <label style="font-size:.78rem;font-weight:600;color:var(--muted);display:block;margin-bottom:.5rem;">类型</label>
+              <div style="display:flex;flex-wrap:wrap;gap:.4rem;">
+                #{foreach $item.config.category as $race => $price}
+                <a class="sku-btn switch-race #{if $price@first}is-primary#{/if}"
+                   data-sku="#{$race|escape:'html'}" data-price="#{$price}" href="javascript:void(0);">
+                  #{lang($race)}<span style="margin-left:.3rem;font-size:.7rem;opacity:.7;">#{$config.currency_symbol}#{$price}</span>
+                </a>
+                #{/foreach}
+              </div>
+            </div>
+            #{/if}
+
+            <!-- Extra SKUs -->
+            #{if !empty($item.config.sku)}
+            #{foreach $item.config.sku as $name => $sku}
+            <div style="margin-bottom:1rem;">
+              <label style="font-size:.78rem;font-weight:600;color:var(--muted);display:block;margin-bottom:.5rem;">#{lang($name)}</label>
+              <div style="display:flex;flex-wrap:wrap;gap:.4rem;">
+                #{foreach $sku as $key => $price}
+                <a class="sku-btn switch-sku #{if $price@first}is-primary#{/if}"
+                   data-sku="#{$name|escape:'html'}" data-value="#{$key|escape:'html'}" data-price="#{$price}" href="javascript:void(0);">
+                  #{lang($key)}#{if $price > 0}<span style="margin-left:.3rem;font-size:.7rem;opacity:.7;">+#{$config.currency_symbol}#{$price}</span>#{/if}
+                </a>
+                #{/foreach}
+              </div>
+            </div>
+            #{/foreach}
+            #{/if}
+
+            <!-- Contact -->
+            #{if !$user}
+            <div>
+              <label style="font-size:.78rem;font-weight:600;color:var(--muted);display:block;margin-bottom:.4rem;">#{contact_type_msg($item.contact_type)}</label>
+              <input type="text" name="contact" class="acg-input" placeholder="#{contact_type_msg($item.contact_type)}" required>
+            </div>
+            #{/if}
+
+            <!-- Quantity -->
+            <div>
+              <label style="font-size:.78rem;font-weight:600;color:var(--muted);display:block;margin-bottom:.4rem;">数量</label>
+              <div style="display:flex;align-items:center;gap:.75rem;">
+                <button type="button" onclick="changeQty(-1)" style="width:32px;height:32px;border-radius:8px;background:rgba(255,255,255,.07);border:1px solid var(--border);color:var(--text);cursor:pointer;display:flex;align-items:center;justify-content:center;">−</button>
+                <input type="number" name="quantity" id="qty" value="1" min="1" max="99" class="acg-input" style="width:5rem;text-align:center;">
+                <button type="button" onclick="changeQty(1)" style="width:32px;height:32px;border-radius:8px;background:rgba(255,255,255,.07);border:1px solid var(--border);color:var(--text);cursor:pointer;display:flex;align-items:center;justify-content:center;">+</button>
+              </div>
+            </div>
+
+            <!-- Password -->
+            <div>
+              <label style="font-size:.78rem;font-weight:600;color:var(--muted);display:block;margin-bottom:.4rem;">查询密码（选填）</label>
+              <input type="password" name="password" class="acg-input" placeholder="设置后凭密码查询订单">
+            </div>
+
+            <!-- Coupon -->
+            <div style="display:flex;gap:.5rem;">
+              <input type="text" name="coupon" id="coupon-input" class="acg-input" placeholder="优惠码（选填）">
+              <button type="button" class="btn-ghost px-4" style="flex-shrink:0;" onclick="checkCoupon()">验证</button>
+            </div>
+
+            <!-- Total + submit -->
+            <div style="padding-top:.75rem;border-top:1px solid var(--border-s);">
+              <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem;">
+                <span style="font-size:.82rem;color:var(--muted);">合计</span>
+                <span style="font-family:'Space Grotesk',sans-serif;font-size:1.5rem;font-weight:700;color:#60A5FA;" class="abacus">#{$config.currency_symbol}#{$item.price}</span>
+              </div>
+              <button type="submit" class="btn-blue w-full" style="width:100%;justify-content:center;padding:.75rem;font-size:.95rem;border-radius:10px;">
+                立即购买
+              </button>
+            </div>
+
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+@media(max-width:768px){
+  .item-grid{grid-template-columns:1fr!important;}
+}
+</style>
+<script>
+function changeQty(d){
+  var el=document.getElementById('qty');
+  el.value=Math.max(1,Math.min(99,(parseInt(el.value)||1)+d));
+  if(window.calcTotal)window.calcTotal();
+}
+function checkCoupon(){
+  var v=document.getElementById('coupon-input').value.trim();
+  if(!v)return;
+  fetch('/user/index/coupon?coupon='+encodeURIComponent(v)+'&commodity_id=#{$item.id}')
+    .then(function(r){return r.json();}).then(function(d){alert(d.msg||'验证完成');});
+}
+</script>
+
+#{ready("/assets/user/controller/index/item.js")}
+#{include file="./Footer.html"}

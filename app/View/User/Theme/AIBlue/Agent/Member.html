@@ -1,0 +1,15 @@
+#{include file="../Common/Header.html"}
+<div class="uc-main">
+    <div class="uc-card">
+        <div class="uc-card__head">
+            <span class="material-icons-outlined">groups</span>
+            <span class="uc-card__title">#{t("我的下级")}</span>
+        </div>
+        <div class="uc-card__body">
+            <table id="member-table"></table>
+        </div>
+    </div>
+</div>
+
+#{ready("/assets/user/controller/user/child.js")}
+#{include file="../Common/Footer.html"}

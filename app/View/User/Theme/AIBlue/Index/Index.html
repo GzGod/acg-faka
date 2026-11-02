@@ -1,0 +1,131 @@
+#{include file="./Header.html"}
+
+<!-- ── HERO ────────────────────────────────────────────────────── -->
+<section class="px-4 pb-8 pt-4">
+  <div style="max-width:72rem;margin:0 auto;">
+    <div class="card reveal" style="padding:2.5rem 2rem;border-color:rgba(59,130,246,.2);background:linear-gradient(135deg,rgba(14,21,32,.98),rgba(9,14,24,.98));position:relative;overflow:hidden;">
+      <div style="position:absolute;top:-60px;left:-60px;width:320px;height:320px;background:radial-gradient(circle,rgba(37,99,235,.12),transparent 70%);filter:blur(30px);pointer-events:none;"></div>
+      <div style="position:relative;">
+        <div style="display:flex;flex-wrap:wrap;gap:.5rem;margin-bottom:1rem;">
+          <span class="badge badge-ok">自动发卡</span>
+          <span class="badge badge-blue">订单可查</span>
+          <span class="badge badge-muted">#{$config.shop_name}</span>
+        </div>
+        <h1 style="font-size:clamp(1.6rem,4vw,2.4rem);font-weight:700;line-height:1.2;margin-bottom:.6rem;">
+          开通到你自己的账号，<span style="color:#60A5FA;">稳定不换号</span>
+        </h1>
+        <p style="color:var(--muted);font-size:.95rem;max-width:36rem;margin-bottom:1.25rem;">#{lang($config.description)}</p>
+        <div style="display:flex;flex-wrap:wrap;gap:.5rem;">
+          <span class="badge badge-muted">不换号</span>
+          <span class="badge badge-muted">不共享</span>
+          <span class="badge badge-muted">支付宝</span>
+          <span class="badge badge-muted">USDT</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── NOTICE ──────────────────────────────────────────────────── -->
+#{if $config.notice}
+<section class="px-4 pb-6">
+  <div style="max-width:72rem;margin:0 auto;">
+    <div class="card reveal" style="padding:1rem 1.25rem;border-color:rgba(245,158,11,.2);background:rgba(245,158,11,.05);">
+      <div style="display:flex;align-items:flex-start;gap:.75rem;">
+        <span style="font-size:1rem;flex-shrink:0;margin-top:.1rem;">📢</span>
+        <p style="font-size:.85rem;color:var(--muted);line-height:1.6;">#{lang($config.notice)}</p>
+      </div>
+    </div>
+  </div>
+</section>
+#{/if}
+
+<!-- ── PRODUCTS ────────────────────────────────────────────────── -->
+<section class="px-4 pb-16">
+  <div style="max-width:72rem;margin:0 auto;">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.1rem;" class="reveal">
+      <h2 style="font-size:1.1rem;font-weight:700;">商品大厅</h2>
+    </div>
+
+    <!-- Category filter -->
+    <div style="display:flex;flex-wrap:wrap;gap:.5rem;margin-bottom:1.5rem;" class="reveal" role="group" aria-label="商品分类">
+      #{foreach $category as $cate}
+        <button class="chip-pill switch-category #{if $cate.commodity_count == 0 && $cate.id != 'recommend'}inactive#{/if} #{if $cate@first && $categoryId == 0}active#{elseif $cate.id == $categoryId}active#{/if}"
+                data-id="#{$cate.id}" onclick="filterCat(this,'#{$cate.id}')">
+          #{lang($cate.name)}#{if $cate.id != 'recommend' && $cate.commodity_count > 0}<span style="margin-left:.3rem;font-size:.65rem;opacity:.6;">#{$cate.commodity_count}</span>#{/if}
+        </button>
+      #{/foreach}
+    </div>
+
+    <!-- Product grid -->
+    <div class="row item-list" id="product-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:.875rem;">
+      <div class="item-message" style="grid-column:1/-1;text-align:center;padding:3rem;color:var(--muted);">努力加载中…</div>
+    </div>
+  </div>
+</section>
+
+<!-- ── HOW TO BUY ──────────────────────────────────────────────── -->
+<section class="px-4 pb-16">
+  <div style="max-width:72rem;margin:0 auto;">
+    <div class="card reveal" style="padding:1.75rem;">
+      <h2 style="font-size:1rem;font-weight:700;margin-bottom:1.25rem;">怎么购买</h2>
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:1rem;margin-bottom:1.25rem;">
+        <div style="display:flex;align-items:flex-start;gap:.75rem;padding:1rem;border-radius:10px;background:rgba(59,130,246,.08);border:1px solid rgba(59,130,246,.2);">
+          <div style="width:28px;height:28px;border-radius:50%;background:#2563EB;display:flex;align-items:center;justify-content:center;font-family:'Space Grotesk',sans-serif;font-weight:700;color:#fff;font-size:.8rem;flex-shrink:0;">1</div>
+          <div><div style="font-weight:600;font-size:.88rem;margin-bottom:.15rem;">下单</div><div style="font-size:.78rem;color:var(--muted);">选好商品，留个邮箱</div></div>
+        </div>
+        <div style="display:flex;align-items:flex-start;gap:.75rem;padding:1rem;border-radius:10px;background:rgba(34,197,94,.08);border:1px solid rgba(34,197,94,.2);">
+          <div style="width:28px;height:28px;border-radius:50%;background:#16A34A;display:flex;align-items:center;justify-content:center;font-family:'Space Grotesk',sans-serif;font-weight:700;color:#fff;font-size:.8rem;flex-shrink:0;">2</div>
+          <div><div style="font-weight:600;font-size:.88rem;margin-bottom:.15rem;">付款</div><div style="font-size:.78rem;color:var(--muted);">支付宝 或 USDT</div></div>
+        </div>
+        <div style="display:flex;align-items:flex-start;gap:.75rem;padding:1rem;border-radius:10px;background:rgba(6,182,212,.08);border:1px solid rgba(6,182,212,.2);">
+          <div style="width:28px;height:28px;border-radius:50%;background:#0891B2;display:flex;align-items:center;justify-content:center;font-family:'Space Grotesk',sans-serif;font-weight:700;color:#fff;font-size:.8rem;flex-shrink:0;">3</div>
+          <div><div style="font-weight:600;font-size:.88rem;margin-bottom:.15rem;">自动交付</div><div style="font-size:.78rem;color:var(--muted);">卡密在订单页显示</div></div>
+        </div>
+      </div>
+      <div style="display:flex;flex-wrap:wrap;gap:.5rem;align-items:center;">
+        <span style="font-size:.78rem;color:var(--muted);margin-right:.25rem;">付款方式</span>
+        <span class="badge badge-blue">支付宝</span>
+        <span class="badge badge-muted">USDT · BSC / ARB</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+#{ready("/assets/user/controller/index/index.js")}
+<script>
+// Reveal on scroll
+(function(){
+  if(!('IntersectionObserver' in window)){document.querySelectorAll('.reveal').forEach(function(el){el.classList.add('in');});return;}
+  var obs=new IntersectionObserver(function(entries){entries.forEach(function(e){if(e.isIntersecting){e.target.classList.add('in');obs.unobserve(e.target);}});},{threshold:.07});
+  document.querySelectorAll('.reveal').forEach(function(el){obs.observe(el);});
+})();
+// Category filter (delegates to acg-faka's own index.js switch-category logic)
+function filterCat(btn, id) {
+  document.querySelectorAll('.chip-pill').forEach(function(b){b.classList.remove('active');});
+  btn.classList.add('active');
+}
+// Override product card render to match our dark-blue style
+window.renderItemCard = function(item) {
+  var stock = item.stock > 0
+    ? '<span class="badge badge-ok"><span style="width:6px;height:6px;border-radius:50%;background:var(--ok2);display:inline-block;"></span> 有货</span>'
+    : '<span class="badge" style="background:rgba(239,68,68,.08);border:1px solid rgba(239,68,68,.2);color:#FCA5A5;"><span style="width:6px;height:6px;border-radius:50%;background:#EF4444;display:inline-block;"></span> 缺货</span>';
+  var delivery = item.delivery_way == 0
+    ? '<span class="badge badge-blue" style="font-size:.62rem;">自动发货</span>'
+    : '<span class="badge badge-muted" style="font-size:.62rem;">人工发货</span>';
+  return '<div class="product-card reveal" style="background:linear-gradient(160deg,rgba(14,21,32,.98),rgba(9,14,24,.98));border:1px solid rgba(19,31,51,.9);border-radius:14px;padding:1rem;cursor:pointer;transition:border-color .2s,transform .2s,box-shadow .2s;" onmouseover="this.style.borderColor=\'rgba(59,130,246,.4)\';this.style.transform=\'translateY(-2px)\';this.style.boxShadow=\'0 8px 32px -8px rgba(59,130,246,.2)\'" onmouseout="this.style.borderColor=\'rgba(19,31,51,.9)\';this.style.transform=\'\';this.style.boxShadow=\'\'" onclick="location.href=\'/user/index/item/\'+'+item.id+'">'
+    + '<div style="display:flex;align-items:flex-start;justify-content:space-between;gap:.5rem;margin-bottom:.75rem;">'
+    + '<div style="font-family:\'Space Grotesk\',sans-serif;font-weight:600;font-size:.88rem;line-height:1.3;flex:1;">' + item.name + '</div>'
+    + delivery
+    + '</div>'
+    + '<div style="margin-bottom:.75rem;">' + stock + '</div>'
+    + '<div style="display:flex;align-items:flex-end;justify-content:space-between;">'
+    + '<div><div style="font-family:\'Space Grotesk\',sans-serif;font-size:1.35rem;font-weight:700;">' + item.price_symbol + item.price + '</div>'
+    + (item.original_price ? '<div style="font-size:.72rem;text-decoration:line-through;color:var(--muted2);">原价 ' + item.price_symbol + item.original_price + '</div>' : '')
+    + '</div>'
+    + '<button style="background:linear-gradient(135deg,#2563EB,#1D4ED8);color:#fff;border:none;border-radius:8px;padding:.4rem .9rem;font-size:.78rem;font-weight:600;cursor:pointer;" onclick="event.stopPropagation();location.href=\'/user/index/item/\'+'+item.id+'">购买</button>'
+    + '</div></div>';
+};
+</script>
+
+#{include file="./Footer.html"}
