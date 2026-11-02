@@ -212,8 +212,6 @@ RUN set -eux; \
     chmod 755 "${ACG_HOME}"; \
     test -L "${ACG_HOME}/app/Plugin"
 
-VOLUME ["/data"]
-
 EXPOSE 80 443
 
 HEALTHCHECK --interval=30s --timeout=5s --start-period=20s --retries=3 \
