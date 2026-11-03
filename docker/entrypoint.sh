@@ -266,8 +266,14 @@ DBCONF
                 echo '[acg-faka] DB already installed, skipping SQL import.' . PHP_EOL;
             }
 
-            // Set AIBlue theme (column is \`key\`, not \`name\`)
+            // Set shop name / title
             \$tbl = \$pre . 'config';
+            \$shopName = getenv('ACG_SHOP_NAME') ?: '雪糕AI';
+            \$pdo->exec(\"UPDATE \`\$tbl\` SET \`value\`='\$shopName' WHERE \`key\`='shop_name'\");
+            \$pdo->exec(\"UPDATE \`\$tbl\` SET \`value\`='\$shopName' WHERE \`key\`='title'\");
+            echo '[acg-faka] Shop name set to ' . \$shopName . PHP_EOL;
+
+            // Set AIBlue theme (column is \`key\`, not \`name\`)
             \$pdo->exec(\"UPDATE \`\$tbl\` SET \`value\`='AIBlue' WHERE \`key\`='user_theme'\");
             \$pdo->exec(\"UPDATE \`\$tbl\` SET \`value\`='AIBlue' WHERE \`key\`='user_mobile_theme'\");
             echo '[acg-faka] Theme set to AIBlue.' . PHP_EOL;
