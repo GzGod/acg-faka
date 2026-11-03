@@ -26,6 +26,19 @@ for name in config install assets_cache plugins pay themes runtime; do
     fi
 done
 
+# Merge new theme directories that were added to the image after the volume was
+# first seeded. The loop above skips /data/themes entirely once it exists, so a
+# new theme (e.g. AIBlue) added in a later image revision never gets copied in.
+if [ -d "${SKEL}/themes" ] && [ -d "${DATA}/themes" ]; then
+    for theme_dir in "${SKEL}/themes"/*/; do
+        theme_name="$(basename "${theme_dir}")"
+        if [ ! -e "${DATA}/themes/${theme_name}" ]; then
+            cp -a "${theme_dir}" "${DATA}/themes/${theme_name}"
+            echo "[acg-faka] Seeded new theme: ${theme_name}"
+        fi
+    done
+fi
+
 mkdir -p \
     "${DATA}/runtime/log" "${DATA}/runtime/plugin" "${DATA}/runtime/request" \
     "${DATA}/runtime/tmp" "${DATA}/runtime/view" "${DATA}/runtime/waf" "${DATA}/runtime/session" \
