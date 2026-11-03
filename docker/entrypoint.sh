@@ -26,17 +26,19 @@ for name in config install assets_cache plugins pay themes runtime; do
     fi
 done
 
-# Merge new theme directories that were added to the image after the volume was
-# first seeded. The loop above skips /data/themes entirely once it exists, so a
-# new theme (e.g. AIBlue) added in a later image revision never gets copied in.
-if [ -d "${SKEL}/themes" ] && [ -d "${DATA}/themes" ]; then
+# Always sync skel-shipped themes into the volume. The main seed loop above
+# skips /data/themes entirely once it exists, so themes added or updated in a
+# later image revision never get applied. User-installed themes live only in
+# /data/themes (not in the skel), so overwriting skel themes is safe.
+if [ -d "${SKEL}/themes" ]; then
+    mkdir -p "${DATA}/themes"
     for theme_dir in "${SKEL}/themes"/*/; do
         theme_name="$(basename "${theme_dir}")"
-        if [ ! -e "${DATA}/themes/${theme_name}" ]; then
-            cp -a "${theme_dir}" "${DATA}/themes/${theme_name}"
-            echo "[acg-faka] Seeded new theme: ${theme_name}"
-        fi
+        rm -rf "${DATA}/themes/${theme_name}"
+        cp -a "${theme_dir}" "${DATA}/themes/${theme_name}"
+        echo "[acg-faka] Synced skel theme: ${theme_name}"
     done
+    chown -R www-data:www-data "${DATA}/themes"
 fi
 
 mkdir -p \
