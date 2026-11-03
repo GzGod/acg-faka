@@ -186,7 +186,25 @@ if [ -n "${ACG_DB_PASSWORD_FILE:-}" ] && [ -r "${ACG_DB_PASSWORD_FILE}" ]; then
 fi
 
 if [ -n "${ACG_DB_HOST:-}" ]; then
-    # Auto-install: import SQL, create Lock, set AIBlue theme
+    # Write database.php config file (acg-faka reads this, not env vars)
+    DB_CFG="${DATA}/config/database.php"
+    mkdir -p "${DATA}/config"
+    cat > "${DB_CFG}" <<DBCONF
+<?php
+declare(strict_types=1);
+return [
+    'driver'    => 'mysql',
+    'host'      => '${ACG_DB_HOST}',
+    'port'      => ${ACG_DB_PORT:-3306},
+    'database'  => '${ACG_DB_DATABASE}',
+    'username'  => '${ACG_DB_USERNAME}',
+    'password'  => '${ACG_DB_PASSWORD}',
+    'charset'   => 'utf8mb4',
+    'collation' => 'utf8mb4_general_ci',
+    'prefix'    => '${ACG_DB_PREFIX:-acg_}',
+];
+DBCONF
+    echo "[acg-faka] database.php written."
     (sleep 8 && php -r "
         \$host = getenv('ACG_DB_HOST');
         \$port = getenv('ACG_DB_PORT') ?: 3306;
