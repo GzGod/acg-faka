@@ -43,6 +43,8 @@ app/Pay/*
 app/View/User/Theme/*
 !app/View/User/Theme/Cartoon
 !app/View/User/Theme/Cartoon/**
+!app/View/User/Theme/AIBlue
+!app/View/User/Theme/AIBlue/**
 
 # 凭证：开发者中心 app_id/app_key、MCP access_key、本机数据库账号密码。
 # database.php 由 Dockerfile 重新写一份空的（安装向导会填），见 Dockerfile。
