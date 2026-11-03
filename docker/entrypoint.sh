@@ -205,7 +205,13 @@ return [
 ];
 DBCONF
     echo "[acg-faka] database.php written."
-    (sleep 8 && php -r "
+
+    # Synchronously wait for MySQL, then import schema + set theme + create admin.
+    # Must finish BEFORE php-fpm starts: acg-faka caches config in runtime/config
+    # (binary-packed), and that cache is seeded from the skel with the Cartoon theme.
+    # If the first request reads that stale cache before our UPDATE lands, the site
+    # stays on Cartoon regardless of what the DB says.
+    php -r "
         \$host = getenv('ACG_DB_HOST');
         \$port = getenv('ACG_DB_PORT') ?: 3306;
         \$db   = getenv('ACG_DB_DATABASE');
@@ -213,9 +219,23 @@ DBCONF
         \$pass = getenv('ACG_DB_PASSWORD');
         \$pre  = getenv('ACG_DB_PREFIX') ?: 'acg_';
         \$lock = '/var/www/html/kernel/Install/Lock';
-        try {
-            \$pdo = new PDO(\"mysql:host=\$host;port=\$port;dbname=\$db;charset=utf8mb4\", \$user, \$pass,
-                [PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION]);
+
+        // Wait for MySQL to accept connections (up to ~60s)
+        \$pdo = null;
+        for (\$i = 0; \$i < 60; \$i++) {
+            try {
+                \$pdo = new PDO(\"mysql:host=\$host;port=\$port;dbname=\$db;charset=utf8mb4\", \$user, \$pass,
+                    [PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION]);
+                break;
+            } catch (Exception \$e) {
+                if (\$i === 0) echo '[acg-faka] Waiting for MySQL...' . PHP_EOL;
+                sleep(1);
+            }
+        }
+        if (\$pdo === null) {
+            echo '[acg-faka] ERROR: MySQL not reachable after 60s' . PHP_EOL;
+        } else {
+            echo '[acg-faka] MySQL connected.' . PHP_EOL;
 
             // Check if already installed (config table exists)
             \$tables = \$pdo->query('SHOW TABLES LIKE \"' . \$pre . 'config\"')->fetchAll();
@@ -237,6 +257,22 @@ DBCONF
             \$pdo->exec(\"UPDATE \`\$tbl\` SET \`value\`='AIBlue' WHERE \`key\`='user_mobile_theme'\");
             echo '[acg-faka] Theme set to AIBlue.' . PHP_EOL;
 
+            // Create default admin account if none exists
+            \$adminTbl = \$pre . 'manage';
+            \$existing = \$pdo->query(\"SELECT COUNT(*) FROM \`\$adminTbl\`\")->fetchColumn();
+            if ((int)\$existing === 0) {
+                \$email    = getenv('ACG_ADMIN_EMAIL') ?: 'admin@aishop.com';
+                \$password = getenv('ACG_ADMIN_PASSWORD') ?: 'Admin@123456';
+                \$hash     = password_hash(\$password, PASSWORD_BCRYPT);
+                \$salt     = substr(md5(uniqid()), 0, 32);
+                \$now      = date('Y-m-d H:i:s');
+                \$stmt = \$pdo->prepare(\"INSERT INTO \`\$adminTbl\` (email,password,salt,nickname,status,type,create_time) VALUES (?,?,?,'Admin',1,0,?)\");
+                \$stmt->execute([\$email, \$hash, \$salt, \$now]);
+                echo '[acg-faka] Admin account created: ' . \$email . PHP_EOL;
+            } else {
+                echo '[acg-faka] Admin account already exists.' . PHP_EOL;
+            }
+
             // Write install Lock file
             if (!file_exists(\$lock)) {
                 file_put_contents(\$lock, date('Y-m-d H:i:s'));
@@ -244,10 +280,15 @@ DBCONF
             } else {
                 echo '[acg-faka] Lock file already exists.' . PHP_EOL;
             }
-        } catch (Exception \$e) {
-            echo '[acg-faka] Auto-install error: ' . \$e->getMessage() . PHP_EOL;
         }
-    " 2>&1) &
+    " 2>&1
+
+    # Delete the stale config cache so the first request rebuilds it from DB.
+    # The skel ships a runtime/config baked with the Cartoon theme; without this
+    # deletion, Config::cached('user_theme') returns Cartoon from the cache file
+    # and never notices the DB now says AIBlue.
+    rm -f "${DATA}/runtime/config"
+    echo "[acg-faka] Stale config cache purged."
 fi
 
 exec "$@"
